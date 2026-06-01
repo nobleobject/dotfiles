@@ -1,0 +1,7 @@
+{{- /* ghostty: macOS uses Library path, Linux uses XDG path — ignore the non-applicable one */ -}}
+{{- if or (eq .profile "work") (eq .chezmoi.os "linux") }}
+Library/Application Support/com.mitchellh.ghostty/config
+{{- end }}
+{{- if or (eq .profile "work") (eq .chezmoi.os "darwin") }}
+.config/ghostty/config
+{{- end }}

@@ -1,0 +1,10 @@
+{{- if eq .chezmoi.os "darwin" }}
+fish_add_path /opt/homebrew/bin
+{{- end }}
+{{- if eq .profile "personal" }}
+
+# LM Studio CLI
+set -gx PATH $PATH {{ .chezmoi.homeDir }}/.cache/lm-studio/bin
+{{- end }}
+
+starship init fish | source

@@ -1,0 +1,10 @@
+// Zellij configuration
+// Run `zellij setup --dump-config` to see all defaults.
+
+keybinds {
+    normal {
+        // Add keybinds here
+    }
+}
+
+// theme "default"
