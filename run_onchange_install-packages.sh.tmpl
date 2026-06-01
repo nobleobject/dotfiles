@@ -46,7 +46,7 @@ case "$PKG_MANAGER" in
     # Binary installs (no system layering needed)
     command -v starship &>/dev/null || curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir "$LOCAL_BIN" --yes
     command -v micro    &>/dev/null || { curl -fsSL https://getmic.ro | bash; mv micro "$LOCAL_BIN/"; }
-    command -v croc     &>/dev/null || curl -fsSL https://getcroc.schollz.com | bash -s -- -d "$LOCAL_BIN"
+    command -v croc     &>/dev/null || curl -fsSL https://getcroc.schollz.com | bash -s -- -b "$LOCAL_BIN"
 
     # GitHub CLI binary release
     if ! command -v gh &>/dev/null; then

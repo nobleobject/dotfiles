@@ -1,6 +1,8 @@
 // Zellij configuration
 // Run `zellij setup --dump-config` to see all defaults.
 
+show_startup_tips false
+
 keybinds {
     normal {
         // Add keybinds here

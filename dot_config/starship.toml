@@ -65,3 +65,8 @@ symbol = "🐍"
 style = "bg:#212736"
 format = '[[ $symbol ($version)( \($virtualenv\)) ](fg:#769ff0 bg:#212736)]($style)'
 pyenv_version_name = false
+
+[time]
+disabled = false
+style = "bg:#1d2230"
+format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'

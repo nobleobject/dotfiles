@@ -4,7 +4,10 @@ set -euo pipefail
 SETTINGS="$HOME/.claude/settings.json"
 NPX="$(command -v npx || echo npx)"
 
-[ ! -f "$SETTINGS" ] && echo '{}' > "$SETTINGS"
+# Create settings.json if missing or invalid
+if [[ ! -f "$SETTINGS" ]] || ! jq . "$SETTINGS" > /dev/null 2>&1; then
+  echo '{}' > "$SETTINGS"
+fi
 
 jq --arg cmd "$NPX -y ccstatusline@latest" \
    '.statusLine = {"type": "command", "command": $cmd, "padding": 0}' \

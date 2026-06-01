@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+{{- if eq .chezmoi.os "darwin" }}
+FISH_PATH="/opt/homebrew/bin/fish"
+{{- else }}
+FISH_PATH="$(command -v fish || echo /usr/bin/fish)"
+{{- end }}
+
+# Register fish in /etc/shells if missing
+if ! grep -qF "$FISH_PATH" /etc/shells 2>/dev/null; then
+  echo "$FISH_PATH" | sudo tee -a /etc/shells
+fi
+
+# Set as default shell if not already
+if [[ "$SHELL" != "$FISH_PATH" ]]; then
+  chsh -s "$FISH_PATH"
+fi
