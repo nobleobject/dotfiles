@@ -31,6 +31,9 @@ else
   warn "No chezmoi.toml found. Answer a few questions to create one."
   echo ""
 
+  # Redirect stdin to terminal — required when script is piped via curl | bash
+  exec < /dev/tty
+
   read -rp "  Profile (personal/work) [personal]: " PROFILE
   PROFILE="${PROFILE:-personal}"
 
@@ -75,6 +78,7 @@ echo "────────────────────────�
 echo ""
 
 # ── 5. Prompt to apply ────────────────────────────────────────────────────────
+[[ -t 0 ]] || exec < /dev/tty
 read -rp "Apply changes? [y/N] " CONFIRM
 if [[ "${CONFIRM,,}" == "y" ]]; then
   chezmoi apply
