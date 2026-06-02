@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_PATH="${BASH_SOURCE[0]:-}"
 REPO="https://github.com/nobleobject/dotfiles.git"
 CHEZMOI_CONFIG="$HOME/.config/chezmoi/chezmoi.toml"
 LOCAL_BIN="$HOME/.local/bin"
@@ -87,4 +88,9 @@ if [[ "${CONFIRM,,}" == "y" ]]; then
   info "Done."
 else
   warn "Skipped. Run 'chezmoi apply' when ready."
+fi
+
+# Self-delete if run as a downloaded file (not piped via curl | bash)
+if [[ -f "$SCRIPT_PATH" ]]; then
+  rm -f "$SCRIPT_PATH"
 fi
