@@ -9,3 +9,14 @@ set -gx PATH $PATH {{ .chezmoi.homeDir }}/.cache/lm-studio/bin
 {{- end }}
 
 starship init fish | source
+
+if command -q chezmoi; and test -d ~/.local/share/chezmoi/.git
+    chezmoi git -- fetch --quiet >/dev/null 2>&1 &
+    disown
+    set -l _behind (chezmoi git -- rev-list --count HEAD..origin/master 2>/dev/null)
+    if test -n "$_behind" -a "$_behind" != "0"
+        set_color yellow
+        echo "dotfiles: $_behind update(s) available — run 'chezmoi update'"
+        set_color normal
+    end
+end
