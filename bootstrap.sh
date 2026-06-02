@@ -32,9 +32,7 @@ else
   echo ""
 
   # Force reads from terminal even when script is piped via curl | bash
-  if ! exec < /dev/tty 2>/dev/null; then
-    error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
-  fi
+  exec < /dev/tty || error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
 
   read -rp "  Profile (personal/work) [personal]: " PROFILE
   PROFILE="${PROFILE:-personal}"
@@ -81,7 +79,7 @@ echo ""
 
 # ── 5. Prompt to apply ────────────────────────────────────────────────────────
 if ! [[ -t 0 ]]; then
-  exec < /dev/tty 2>/dev/null || error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
+  exec < /dev/tty || error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
 fi
 read -rp "Apply changes? [y/N] " CONFIRM
 if [[ "${CONFIRM,,}" == "y" ]]; then
