@@ -31,8 +31,8 @@ else
   warn "No chezmoi.toml found. Answer a few questions to create one."
   echo ""
 
-  # Redirect stdin to terminal — required when script is piped via curl | bash
-  exec < /dev/tty
+  # Force reads from terminal even when script is piped via curl | bash
+  exec < /dev/tty 2>/dev/null || exec < /proc/self/fd/1
 
   read -rp "  Profile (personal/work) [personal]: " PROFILE
   PROFILE="${PROFILE:-personal}"
@@ -46,16 +46,16 @@ else
   fi
 
   mkdir -p "$(dirname "$CHEZMOI_CONFIG")"
-  cat > "$CHEZMOI_CONFIG" <<TOML
-[data]
-  profile        = "$PROFILE"
-  git_name       = "$GIT_NAME"
-  git_email      = "$GIT_EMAIL"
-  git_signingkey = "$SIGNING_KEY"
-
-[onepassword]
-  command = "op"
-TOML
+  # Use printf to avoid heredoc + shell expansion issues in curl | bash context
+  {
+    printf '[data]\n'
+    printf '  profile        = "%s"\n' "$PROFILE"
+    printf '  git_name       = "%s"\n' "$GIT_NAME"
+    printf '  git_email      = "%s"\n' "$GIT_EMAIL"
+    printf '  git_signingkey = "%s"\n' "$SIGNING_KEY"
+    printf '\n[onepassword]\n'
+    printf '  command = "op"\n'
+  } > "$CHEZMOI_CONFIG"
 
   info "Created $CHEZMOI_CONFIG"
 fi
