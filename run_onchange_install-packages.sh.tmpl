@@ -27,7 +27,7 @@ fi
 
 case "$PKG_MANAGER" in
   brew)
-    brew install fish starship micro croc fzf ripgrep eza btop tree jq gh wget neovim
+    brew install fish starship micro croc fzf ripgrep eza btop tree jq gh wget neovim ranger
     {{ if eq .chezmoi.os "darwin" -}}
     brew install docker docker-compose colima
     {{ else -}}
@@ -53,7 +53,7 @@ case "$PKG_MANAGER" in
     # Docker excluded — Podman ships pre-installed on Bazzite.
     # Need Docker? Run: ujust setup-virtualization
     OSTREE_PKGS=""
-    for pkg in fish fzf ripgrep eza btop tree jq wget neovim; do
+    for pkg in fish fzf ripgrep eza btop tree jq wget neovim ranger; do
       command -v "$pkg" >/dev/null 2>&1 || OSTREE_PKGS="$OSTREE_PKGS $pkg"
     done
     if [ -n "$OSTREE_PKGS" ]; then
@@ -72,7 +72,7 @@ case "$PKG_MANAGER" in
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
       | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
     sudo apt-get update -qq
-    sudo apt-get install -y fish fzf ripgrep btop tree jq gh wget neovim
+    sudo apt-get install -y fish fzf ripgrep btop tree jq gh wget neovim ranger
 
     # eza not in apt repos before Ubuntu 23.10 / Debian 13
     if ! sudo apt-get install -y eza 2>/dev/null; then
@@ -93,7 +93,7 @@ case "$PKG_MANAGER" in
     ;;
 
   dnf)
-    sudo dnf install -y fish fzf ripgrep eza btop tree jq wget neovim croc
+    sudo dnf install -y fish fzf ripgrep eza btop tree jq wget neovim croc ranger
 
     if ! command -v gh >/dev/null 2>&1; then
       sudo dnf install -y 'dnf-command(config-manager)'
