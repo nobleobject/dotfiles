@@ -80,7 +80,14 @@ case "$PKG_MANAGER" in
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
       | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
     sudo apt-get update -qq
-    sudo apt-get install -y fish fzf ripgrep eza btop tree jq gh wget neovim
+    sudo apt-get install -y fish fzf ripgrep btop tree jq gh wget neovim
+
+    # eza not in apt repos before Ubuntu 23.10 / Debian 13
+    if ! sudo apt-get install -y eza 2>/dev/null; then
+      EZA_VER=$(curl -fsSL https://api.github.com/repos/eza-community/eza/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+      curl -fsSL "https://github.com/eza-community/eza/releases/download/${EZA_VER}/eza_x86_64-unknown-linux-gnu.tar.gz" \
+        | tar -xz -C /tmp && sudo mv /tmp/eza /usr/local/bin/
+    fi
 
     command -v croc     &>/dev/null || curl -fsSL https://getcroc.schollz.com | bash
     command -v starship &>/dev/null || curl -sS https://starship.rs/install.sh | sh -s -- --yes
