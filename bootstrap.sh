@@ -32,18 +32,19 @@ else
   warn "No chezmoi.toml found. Answer a few questions to create one."
   echo ""
 
-  # Force reads from terminal even when script is piped via curl | bash
-  exec < /dev/tty || error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
+  [[ -e /dev/tty ]] || error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
 
-  read -rp "  Profile (personal/work) [personal]: " PROFILE
+  # Read from /dev/tty explicitly — exec < /dev/tty would cut bash off from the
+  # piped script source in a curl | bash context.
+  read -rp "  Profile (personal/work) [personal]: " PROFILE < /dev/tty
   PROFILE="${PROFILE:-personal}"
 
-  read -rp "  Git name: " GIT_NAME
-  read -rp "  Git email: " GIT_EMAIL
+  read -rp "  Git name: " GIT_NAME < /dev/tty
+  read -rp "  Git email: " GIT_EMAIL < /dev/tty
 
   SIGNING_KEY=""
   if [[ "$PROFILE" == "personal" ]]; then
-    read -rp "  Git signing key (SSH public key, blank to skip): " SIGNING_KEY
+    read -rp "  Git signing key (SSH public key, blank to skip): " SIGNING_KEY < /dev/tty
   fi
 
   mkdir -p "$(dirname "$CHEZMOI_CONFIG")"
@@ -79,10 +80,7 @@ echo "────────────────────────�
 echo ""
 
 # ── 5. Prompt to apply ────────────────────────────────────────────────────────
-if ! [[ -t 0 ]]; then
-  exec < /dev/tty || error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
-fi
-read -rp "Apply changes? [y/N] " CONFIRM
+read -rp "Apply changes? [y/N] " CONFIRM < /dev/tty
 if [[ "${CONFIRM,,}" == "y" ]]; then
   chezmoi apply
   info "Done."
