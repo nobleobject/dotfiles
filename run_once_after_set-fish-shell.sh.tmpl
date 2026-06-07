@@ -14,5 +14,9 @@ fi
 
 # Set as default shell if not already
 if [ "$SHELL" != "$FISH_PATH" ]; then
+{{- if eq .chezmoi.os "darwin" }}
   chsh -s "$FISH_PATH"
+{{- else }}
+  sudo usermod -s "$FISH_PATH" "$USER"
+{{- end }}
 fi
