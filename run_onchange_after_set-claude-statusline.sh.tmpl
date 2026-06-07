@@ -1,6 +1,5 @@
 #!/bin/sh
-[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
-set -euo pipefail
+set -eu
 
 SETTINGS="$HOME/.claude/settings.json"
 NPX="$(command -v npx || echo npx)"
@@ -8,7 +7,7 @@ NPX="$(command -v npx || echo npx)"
 mkdir -p "$(dirname "$SETTINGS")"
 
 # Create settings.json if missing or invalid
-if [[ ! -f "$SETTINGS" ]] || ! jq . "$SETTINGS" > /dev/null 2>&1; then
+if [ ! -f "$SETTINGS" ] || ! jq . "$SETTINGS" > /dev/null 2>&1; then
   echo '{}' > "$SETTINGS"
 fi
 

@@ -1,35 +1,29 @@
 #!/bin/sh
-# chezmoi runs scripts via sh — re-exec with bash for array/[[ support
-[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
-set -euo pipefail
+set -eu
 
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 
 # Detect OS
 OS_ID=""
-[[ -f /etc/os-release ]] && source /etc/os-release && OS_ID="${ID:-}"
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  OS_ID="${ID:-}"
+fi
 
 # Brew wins on any OS if present — preferred CLI tool manager on all platforms.
-if command -v brew &>/dev/null; then
+if command -v brew >/dev/null 2>&1; then
   PKG_MANAGER="brew"
-elif [[ "$OS_ID" == "bazzite" ]]; then
+elif [ "$OS_ID" = "bazzite" ]; then
   PKG_MANAGER="bazzite"
-elif command -v apt-get &>/dev/null; then
+elif command -v apt-get >/dev/null 2>&1; then
   PKG_MANAGER="apt"
-elif command -v dnf &>/dev/null; then
+elif command -v dnf >/dev/null 2>&1; then
   PKG_MANAGER="dnf"
 else
   echo "No supported package manager found" >&2
   exit 1
 fi
-
-# Helper: install binary to ~/.local/bin if not already present
-install_binary() {
-  local name="$1" url="$2"
-  command -v "$name" &>/dev/null && return
-  curl -fsSL "$url" -o "$LOCAL_BIN/$name" && chmod +x "$LOCAL_BIN/$name"
-}
 
 case "$PKG_MANAGER" in
   brew)
@@ -42,34 +36,30 @@ case "$PKG_MANAGER" in
     ;;
 
   bazzite)
-    # Priority: binary installs to ~/.local/bin → rpm-ostree for system packages.
-    # rpm-ostree changes require a reboot to take effect.
-
-    # Binary installs (no system layering needed)
-    command -v starship &>/dev/null || curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir "$LOCAL_BIN" --yes
-    command -v micro    &>/dev/null || { curl -fsSL https://getmic.ro | bash; mv micro "$LOCAL_BIN/"; }
-    command -v croc     &>/dev/null || curl -fsSL https://getcroc.schollz.com | bash -s -- -b "$LOCAL_BIN"
+    # Binary installs to ~/.local/bin (no system layering needed)
+    command -v starship >/dev/null 2>&1 || curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir "$LOCAL_BIN" --yes
+    command -v micro    >/dev/null 2>&1 || { curl -fsSL https://getmic.ro | sh; mv micro "$LOCAL_BIN/"; }
+    command -v croc     >/dev/null 2>&1 || curl -fsSL https://getcroc.schollz.com | sh -s -- -b "$LOCAL_BIN"
 
     # GitHub CLI binary release
-    if ! command -v gh &>/dev/null; then
+    if ! command -v gh >/dev/null 2>&1; then
       GH_VER=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
       curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_linux_amd64.tar.gz" \
         | tar -xz -C /tmp
       cp "/tmp/gh_${GH_VER}_linux_amd64/bin/gh" "$LOCAL_BIN/"
     fi
 
-    # rpm-ostree for packages needing system integration.
-    # Groups into one transaction to minimize reboots.
-    # Docker is intentionally excluded — Podman ships pre-installed on Bazzite.
+    # rpm-ostree for packages needing system integration (reboot required after).
+    # Docker excluded — Podman ships pre-installed on Bazzite.
     # Need Docker? Run: ujust setup-virtualization
-    OSTREE_PKGS=()
+    OSTREE_PKGS=""
     for pkg in fish fzf ripgrep eza btop tree jq wget neovim; do
-      command -v "$pkg" &>/dev/null || OSTREE_PKGS+=("$pkg")
+      command -v "$pkg" >/dev/null 2>&1 || OSTREE_PKGS="$OSTREE_PKGS $pkg"
     done
-
-    if [[ ${#OSTREE_PKGS[@]} -gt 0 ]]; then
-      echo "Installing via rpm-ostree (reboot required after): ${OSTREE_PKGS[*]}"
-      sudo rpm-ostree install --idempotent "${OSTREE_PKGS[@]}"
+    if [ -n "$OSTREE_PKGS" ]; then
+      echo "Installing via rpm-ostree (reboot required after):$OSTREE_PKGS"
+      # shellcheck disable=SC2086
+      sudo rpm-ostree install --idempotent $OSTREE_PKGS
     fi
     ;;
 
@@ -91,12 +81,12 @@ case "$PKG_MANAGER" in
         | tar -xz -C /tmp && sudo mv /tmp/eza /usr/local/bin/
     fi
 
-    command -v croc     &>/dev/null || curl -fsSL https://getcroc.schollz.com | bash
-    command -v starship &>/dev/null || curl -sS https://starship.rs/install.sh | sh -s -- --yes
-    command -v micro    &>/dev/null || { curl -fsSL https://getmic.ro | bash; sudo mv micro /usr/local/bin/; }
+    command -v croc     >/dev/null 2>&1 || curl -fsSL https://getcroc.schollz.com | sh
+    command -v starship >/dev/null 2>&1 || curl -sS https://starship.rs/install.sh | sh -s -- --yes
+    command -v micro    >/dev/null 2>&1 || { curl -fsSL https://getmic.ro | sh; sudo mv micro /usr/local/bin/; }
 
     # Docker
-    if ! command -v docker &>/dev/null; then
+    if ! command -v docker >/dev/null 2>&1; then
       curl -fsSL https://get.docker.com | sh
       sudo apt-get install -y docker-compose-plugin
     fi
@@ -105,16 +95,16 @@ case "$PKG_MANAGER" in
   dnf)
     sudo dnf install -y fish fzf ripgrep eza btop tree jq wget neovim croc
 
-    if ! command -v gh &>/dev/null; then
+    if ! command -v gh >/dev/null 2>&1; then
       sudo dnf install -y 'dnf-command(config-manager)'
       sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
       sudo dnf install -y gh
     fi
 
-    command -v starship &>/dev/null || curl -sS https://starship.rs/install.sh | sh -s -- --yes
-    command -v micro    &>/dev/null || { curl -fsSL https://getmic.ro | bash; sudo mv micro /usr/local/bin/; }
+    command -v starship >/dev/null 2>&1 || curl -sS https://starship.rs/install.sh | sh -s -- --yes
+    command -v micro    >/dev/null 2>&1 || { curl -fsSL https://getmic.ro | sh; sudo mv micro /usr/local/bin/; }
 
-    if ! command -v docker &>/dev/null; then
+    if ! command -v docker >/dev/null 2>&1; then
       sudo dnf install -y dnf-plugins-core
       sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
       sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
@@ -124,4 +114,4 @@ case "$PKG_MANAGER" in
 esac
 
 # Claude Code CLI
-command -v claude &>/dev/null || curl -fsSL https://claude.ai/install.sh | sh
+command -v claude >/dev/null 2>&1 || curl -fsSL https://claude.ai/install.sh | sh

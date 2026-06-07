@@ -1,6 +1,5 @@
 #!/bin/sh
-[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
-set -euo pipefail
+set -eu
 
 {{- if eq .chezmoi.os "darwin" }}
 FISH_PATH="/opt/homebrew/bin/fish"
@@ -14,6 +13,6 @@ if ! grep -qF "$FISH_PATH" /etc/shells 2>/dev/null; then
 fi
 
 # Set as default shell if not already
-if [[ "$SHELL" != "$FISH_PATH" ]]; then
+if [ "$SHELL" != "$FISH_PATH" ]; then
   chsh -s "$FISH_PATH"
 fi
