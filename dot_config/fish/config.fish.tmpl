@@ -1,6 +1,10 @@
 fish_add_path ~/.local/bin
 {{- if eq .chezmoi.os "darwin" }}
 fish_add_path /opt/homebrew/bin
+{{- else }}
+if test -f /home/linuxbrew/.linuxbrew/bin/brew
+    eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+end
 {{- end }}
 {{- if eq .profile "personal" }}
 
