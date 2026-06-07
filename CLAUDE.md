@@ -72,8 +72,26 @@ curl -fsSL https://raw.githubusercontent.com/nobleobject/dotfiles/master/bootstr
 
 Script installs chezmoi, prompts to create `~/.config/chezmoi/chezmoi.toml`, inits from repo, shows diff, prompts before applying.
 
+## Run scripts
+
+| Script | Type | What it does |
+|--------|------|-------------|
+| `run_onchange_install-packages.sh.tmpl` | onchange | Installs packages; rerun when file content changes |
+| `run_once_after_set-fish-shell.sh.tmpl` | once | Registers fish in `/etc/shells`, sets as default shell via `chsh` |
+| `run_onchange_after_set-claude-statusline.sh.tmpl` | onchange | Writes `statusLine` config to `~/.claude/settings.json` via `jq` |
+
 ## Package install script
 
-`run_onchange_install-packages.sh.tmpl` detects package manager in order: brew → bazzite (rpm-ostree + binaries) → apt → dnf. Adding a package to the list triggers rerun on next `chezmoi apply`.
+Package manager detection order: brew → bazzite (rpm-ostree + binaries) → apt → dnf. **Brew wins on any OS if present** — it's the preferred CLI tool manager on Linux too, not just macOS.
 
-Bazzite note: Podman is pre-installed, Docker excluded. Use `ujust setup-virtualization` if Docker needed.
+Adding a package to the list triggers rerun on next `chezmoi apply`.
+
+Bazzite: Podman pre-installed, Docker excluded. Use `ujust setup-virtualization` if Docker needed. rpm-ostree changes require a reboot.
+
+## Git signing (personal profile)
+
+`private_dot_gitconfig.tmpl` enables SSH commit signing via 1Password agent on personal profile:
+- macOS: `/Applications/1Password.app/Contents/MacOS/op-ssh-sign`
+- Linux: `/opt/1Password/op-ssh-sign`
+
+Work profile has no signing key and no signing config.
