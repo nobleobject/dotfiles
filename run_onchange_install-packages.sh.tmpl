@@ -27,7 +27,7 @@ fi
 
 case "$PKG_MANAGER" in
   brew)
-    brew install fish starship micro croc fzf ripgrep eza btop tree jq gh wget neovim ranger
+    brew install fish starship micro croc fzf ripgrep eza btop tree jq gh wget neovim ranger zellij
     {{ if eq .chezmoi.os "darwin" -}}
     brew install docker docker-compose colima
     {{ else -}}
@@ -53,7 +53,7 @@ case "$PKG_MANAGER" in
     # Docker excluded — Podman ships pre-installed on Bazzite.
     # Need Docker? Run: ujust setup-virtualization
     OSTREE_PKGS=""
-    for pkg in fish fzf ripgrep eza btop tree jq wget neovim ranger; do
+    for pkg in fish fzf ripgrep eza btop tree jq wget neovim ranger zellij; do
       command -v "$pkg" >/dev/null 2>&1 || OSTREE_PKGS="$OSTREE_PKGS $pkg"
     done
     if [ -n "$OSTREE_PKGS" ]; then
@@ -93,7 +93,7 @@ case "$PKG_MANAGER" in
     ;;
 
   dnf)
-    sudo dnf install -y fish fzf ripgrep eza btop tree jq wget neovim croc ranger
+    sudo dnf install -y fish fzf ripgrep eza btop tree jq wget neovim croc ranger zellij
 
     if ! command -v gh >/dev/null 2>&1; then
       sudo dnf install -y 'dnf-command(config-manager)'
