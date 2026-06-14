@@ -4,13 +4,25 @@ chezmoi-managed dotfiles. Supports macOS (personal + work) and Linux (Bazzite, V
 
 ## Setup
 
+**Fast (native one-liner)** — installs chezmoi, clones, prompts, and applies:
+
+```bash
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply nobleobject
+```
+
+`.chezmoi.toml.tmpl` prompts for profile (`personal` / `work`), git name,
+email, and optional SSH signing key, then applies immediately.
+
+**Cautious (bootstrap script)** — same prompts, but shows a diff preview and
+asks before applying:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nobleobject/dotfiles/master/bootstrap.sh | bash
 ```
 
 The script will:
 1. Install chezmoi (via Homebrew on macOS, or directly to `~/.local/bin` on Linux)
-2. Prompt for profile (`personal` / `work`), git name, email, and optional SSH signing key
+2. Run `chezmoi init`, which prompts for profile, git name, email, and optional SSH signing key
 3. Show a diff preview
 4. Ask before applying anything
 
