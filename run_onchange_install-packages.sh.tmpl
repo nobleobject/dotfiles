@@ -81,6 +81,13 @@ case "$PKG_MANAGER" in
         | tar -xz -C /tmp && sudo mv /tmp/eza /usr/local/bin/
     fi
 
+    # zellij not in Debian/Ubuntu stable repos — fall back to GitHub release
+    if ! sudo apt-get install -y zellij 2>/dev/null; then
+      ZJ_VER=$(curl -fsSL https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+      curl -fsSL "https://github.com/zellij-org/zellij/releases/download/${ZJ_VER}/zellij-x86_64-unknown-linux-musl.tar.gz" \
+        | tar -xz -C /tmp && sudo mv /tmp/zellij /usr/local/bin/
+    fi
+
     command -v croc     >/dev/null 2>&1 || curl -fsSL https://getcroc.schollz.com | sh
     command -v starship >/dev/null 2>&1 || curl -sS https://starship.rs/install.sh | sh -s -- --yes
     command -v micro    >/dev/null 2>&1 || { curl -fsSL https://getmic.ro | sh; sudo mv micro /usr/local/bin/; }
