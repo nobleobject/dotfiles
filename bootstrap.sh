@@ -3,7 +3,6 @@ set -euo pipefail
 
 SCRIPT_PATH="${BASH_SOURCE[0]:-}"
 REPO="https://github.com/nobleobject/dotfiles.git"
-CHEZMOI_CONFIG="$HOME/.config/chezmoi/chezmoi.toml"
 LOCAL_BIN="$HOME/.local/bin"
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
@@ -25,42 +24,8 @@ else
   fi
 fi
 
-# ── 2. Create chezmoi.toml if missing ────────────────────────────────────────
-if [[ -f "$CHEZMOI_CONFIG" ]]; then
-  info "chezmoi.toml already exists — skipping"
-else
-  warn "No chezmoi.toml found. Answer a few questions to create one."
-  echo ""
-
-  [[ -e /dev/tty ]] || error "Cannot open /dev/tty. Run the script directly instead of curl | bash."
-
-  # Read from /dev/tty explicitly — exec < /dev/tty would cut bash off from the
-  # piped script source in a curl | bash context.
-  read -rp "  Profile (personal/work) [personal]: " PROFILE < /dev/tty
-  PROFILE="${PROFILE:-personal}"
-
-  read -rp "  Git name: " GIT_NAME < /dev/tty
-  read -rp "  Git email: " GIT_EMAIL < /dev/tty
-
-  SIGNING_KEY=""
-  if [[ "$PROFILE" == "personal" ]]; then
-    read -rp "  Git signing key (SSH public key, blank to skip): " SIGNING_KEY < /dev/tty
-  fi
-
-  mkdir -p "$(dirname "$CHEZMOI_CONFIG")"
-  # Use printf to avoid heredoc + shell expansion issues in curl | bash context
-  {
-    printf '[data]\n'
-    printf '  profile        = "%s"\n' "$PROFILE"
-    printf '  git_name       = "%s"\n' "$GIT_NAME"
-    printf '  git_email      = "%s"\n' "$GIT_EMAIL"
-    printf '  git_signingkey = "%s"\n' "$SIGNING_KEY"
-    printf '\n[onepassword]\n'
-    printf '  command = "op"\n'
-  } > "$CHEZMOI_CONFIG"
-
-  info "Created $CHEZMOI_CONFIG"
-fi
+# chezmoi init (below) runs .chezmoi.toml.tmpl, which prompts for profile,
+# git name/email, and signing key, then writes ~/.config/chezmoi/chezmoi.toml.
 
 # ── 3. Init or update ─────────────────────────────────────────────────────────
 if [[ -d "$HOME/.local/share/chezmoi/.git" ]]; then
