@@ -1,0 +1,15 @@
+{{- $profile := promptStringOnce . "profile" "Profile (personal/work)" "personal" -}}
+{{- $gitName := promptStringOnce . "git_name" "Git name" -}}
+{{- $gitEmail := promptStringOnce . "git_email" "Git email" -}}
+{{- $signingKey := "" -}}
+{{- if eq $profile "personal" -}}
+{{-   $signingKey = promptStringOnce . "git_signingkey" "Git signing key (SSH pubkey, blank to skip)" "" -}}
+{{- end -}}
+[data]
+  profile        = {{ $profile | quote }}
+  git_name       = {{ $gitName | quote }}
+  git_email      = {{ $gitEmail | quote }}
+  git_signingkey = {{ $signingKey | quote }}
+
+[onepassword]
+  command = "op"
