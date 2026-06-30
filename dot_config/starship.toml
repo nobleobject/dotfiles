@@ -1,6 +1,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
+${env_var.ZMX_SESSION}\
 [░▒▓](#a3aed2)\
 $os\
 $hostname\
@@ -81,3 +82,8 @@ pyenv_version_name = false
 disabled = false
 style = "bg:#1d2230"
 format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+
+[env_var.ZMX_SESSION]
+symbol = " "
+style = "bold fg:#1d2230 bg:#bd93f9"
+format = "[ $symbol$env_value ]($style)[ ](fg:#bd93f9)"

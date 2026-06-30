@@ -27,7 +27,7 @@ fi
 
 case "$PKG_MANAGER" in
   brew)
-    brew install fish starship micro croc fzf ripgrep eza btop tree jq gh wget neovim ranger zellij
+    brew install fish starship micro croc fzf ripgrep eza btop tree jq gh wget neovim ranger neurosnap/tap/zmx
     {{ if eq .chezmoi.os "darwin" -}}
     brew install docker docker-compose colima
     {{ else -}}
@@ -52,8 +52,15 @@ case "$PKG_MANAGER" in
     # rpm-ostree for packages needing system integration (reboot required after).
     # Docker excluded — Podman ships pre-installed on Bazzite.
     # Need Docker? Run: ujust setup-virtualization
+    # zmx — session persistence tool (replaces zellij); no Flatpak, so GitHub release binary
+    if ! command -v zmx >/dev/null 2>&1; then
+      ZMX_VER="0.6.0"
+      curl -fsSL "https://github.com/neurosnap/zmx/releases/download/v${ZMX_VER}/zmx-${ZMX_VER}-linux-x86_64.tar.gz" \
+        | tar -xz -C "$LOCAL_BIN"
+    fi
+
     OSTREE_PKGS=""
-    for pkg in fish fzf ripgrep eza btop tree jq wget neovim ranger zellij; do
+    for pkg in fish fzf ripgrep eza btop tree jq wget neovim ranger; do
       command -v "$pkg" >/dev/null 2>&1 || OSTREE_PKGS="$OSTREE_PKGS $pkg"
     done
     if [ -n "$OSTREE_PKGS" ]; then
@@ -81,11 +88,11 @@ case "$PKG_MANAGER" in
         | tar -xz -C /tmp && sudo mv /tmp/eza /usr/local/bin/
     fi
 
-    # zellij not in Debian/Ubuntu stable repos — fall back to GitHub release
-    if ! sudo apt-get install -y zellij 2>/dev/null; then
-      ZJ_VER=$(curl -fsSL https://api.github.com/repos/zellij-org/zellij/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
-      curl -fsSL "https://github.com/zellij-org/zellij/releases/download/${ZJ_VER}/zellij-x86_64-unknown-linux-musl.tar.gz" \
-        | tar -xz -C /tmp && sudo mv /tmp/zellij /usr/local/bin/
+    # zmx — session persistence tool; GitHub release binary
+    if ! command -v zmx >/dev/null 2>&1; then
+      ZMX_VER="0.6.0"
+      curl -fsSL "https://github.com/neurosnap/zmx/releases/download/v${ZMX_VER}/zmx-${ZMX_VER}-linux-x86_64.tar.gz" \
+        | tar -xz -C /usr/local/bin
     fi
 
     command -v croc     >/dev/null 2>&1 || curl -fsSL https://getcroc.schollz.com | sh
@@ -100,7 +107,14 @@ case "$PKG_MANAGER" in
     ;;
 
   dnf)
-    sudo dnf install -y fish fzf ripgrep eza btop tree jq wget neovim croc ranger zellij
+    sudo dnf install -y fish fzf ripgrep eza btop tree jq wget neovim croc ranger
+
+    # zmx — session persistence tool; GitHub release binary
+    if ! command -v zmx >/dev/null 2>&1; then
+      ZMX_VER="0.6.0"
+      curl -fsSL "https://github.com/neurosnap/zmx/releases/download/v${ZMX_VER}/zmx-${ZMX_VER}-linux-x86_64.tar.gz" \
+        | tar -xz -C /usr/local/bin
+    fi
 
     if ! command -v gh >/dev/null 2>&1; then
       sudo dnf install -y 'dnf-command(config-manager)'
