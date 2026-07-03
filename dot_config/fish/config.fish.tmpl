@@ -14,7 +14,7 @@ set -gx PATH $PATH {{ .chezmoi.homeDir }}/.cache/lm-studio/bin
 
 starship init fish | source
 
-if command -q chezmoi; and test -d ~/.local/share/chezmoi/.git
+if status is-interactive; and command -q chezmoi; and test -d ~/.local/share/chezmoi/.git
     chezmoi git -- fetch --quiet >/dev/null 2>&1 &
     disown
     set -l _behind (chezmoi git -- rev-list --count HEAD..origin/master 2>/dev/null)
